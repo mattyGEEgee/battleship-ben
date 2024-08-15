@@ -1,0 +1,14 @@
+{
+  "name": "battleship-ben",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 5002",
+    "build": "vite build",
+    "preview": "vite preview --port 5003"
+  },
+  "devDependencies": {
+    "vite": "^5.4.0"
+  }
+}
