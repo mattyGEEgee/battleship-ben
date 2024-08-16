@@ -24,7 +24,37 @@ export async function start() {
             outputDevices[devices[i].label] = devices[i].deviceId
         }
     }
+
+    // show dialog and update Connected MIDI Devices when device is connected/disconnected
+    midi.onstatechange = (event) => {
+        populateConnectedMIDIDevices()
+        MIDItoNotesBinding()
+        const dialog = document.createElement('dialog')
+        const message = document.createElement('p')
+        const closeMessage = document.createElement('p')
+        message.textContent = `${event.port.manufacturer} ${event.port.name} was ${event.port.state}`
+        closeMessage.textContent = `press esc to close this dialog`
+        dialog.appendChild(message).appendChild(closeMessage)
+        document.body.appendChild(dialog)
+        dialog.showModal()
+    }
+
+    MIDItoNotesBinding()
+    populateSelectAudioDevices(inputDevices, selectInputDevices)
+    populateSelectAudioDevices(outputDevices, selectOutputDevices)
 }
+
+// --- NEXT HERE
+
+export function MIDItoNotesBinding() {
+    // make MIDI messages work
+    midi.inputs.values().forEach((device) => {
+        device.onmidimessage = (message) => console.log(`note: ${message.data[1]}\nvelocity: ${message.data[2]}`)
+        // data = [.., note/message, velocity(0 = off)]
+    });
+}
+
+// --- </NEXT
 
 export function populateSelectAudioDevices(deviceArray, selectTag) {
     selectTag.size = Object.keys(deviceArray).length
@@ -37,18 +67,14 @@ export function populateSelectAudioDevices(deviceArray, selectTag) {
 }
 
 export function populateConnectedMIDIDevices() {
+    while (connectedMIDIDevices.firstChild) {
+        connectedMIDIDevices.removeChild(connectedMIDIDevices.lastChild);
+    }
     midi.inputs.forEach((midiInput) => {
         const li = document.createElement('li')
         li.textContent = `${midiInput.manufacturer} ${midiInput.name}`
         connectedMIDIDevices.appendChild(li)
     })
-}
-
-export function setUpMIDIInput() {
-    midi.inputs.values().forEach((device) => {
-        device.onmidimessage = (message) => console.log(`note: ${message.data[1]}\nvelocity: ${message.data[2]}`)
-        // data = [.., note/message, velocity(0 = off)]
-    });
 }
 
 export function changeOutputDevice(Tone, newOuputDevice) {

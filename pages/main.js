@@ -1,16 +1,18 @@
 import * as Tone from 'tone'
 import * as helpers from './helpers';
 
-// attach to an ON button
-    // do not un-disable everything until this promise returns
-helpers.start().then(() => {
-    helpers.populateSelectAudioDevices(helpers.inputDevices, helpers.selectInputDevices)
-    helpers.populateSelectAudioDevices(helpers.outputDevices, helpers.selectOutputDevices)
-    helpers.populateConnectedMIDIDevices()
-    helpers.setUpMIDIInput()
-}) 
+const startDialog = document.querySelector('dialog#start-dialog')
+const startButton = document.querySelector('input#start-button')
+startDialog.showModal()
+
+startButton.addEventListener('click', async (event) => {
+    await helpers.start()
+    startDialog.close()
+})
 
 // --- NEXT HERE
+
+// helpers.js line 47
 
 const testButton = document.querySelector('input#test')
 testButton.addEventListener('click', (event) => {
