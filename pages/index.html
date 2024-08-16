@@ -7,12 +7,23 @@
         <title>Ben's Battleship</title>
         <!-- <link rel="icon" type="image/x-icon" href="favicon.ico"> -->
         <link rel="stylesheet" href="style.css">
-        <!-- <script type="text/javascript" src="https://livejs.com/live.js"></script> -->
     </head>
     <body>
-        <select name="input-devices" id="input-devices"></select>
-        <select name="output-devices" id="output-devices"></select>
+        <label>
+            Input Device
+            <select name="input-devices" id="input-devices"></select>
+        </label>
+        <label>
+            Output Device
+            <select name="output-devices" id="output-devices"></select>
+        </label>
+        <label>
+            Connected MIDI Devices
+            <ul id="connected-midi-devices"></ul>
+        </label>
+        <input type="button" value="Test" id="test">
 
+        <script src="helpers.js" type="module"></script>
         <script src="main.js" type="module"></script>
     </body>
 </html>
