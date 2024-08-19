@@ -6,6 +6,8 @@ export class ConfigureAudioDevices {
     #selectOutputDevices
     #outputDevices
     #inputDevices
+    #webAudioContext
+    #toneAudioContext
     #mic
 
     constructor() {
@@ -13,13 +15,23 @@ export class ConfigureAudioDevices {
         this.#selectOutputDevices = document.querySelector('select#output-devices')
         this.#outputDevices = {}
         this.#inputDevices = {}
-        this.#mic
+        this.#toneAudioContext = Tone.getContext()
+        this.#webAudioContext = new AudioContext({
+            latencyHint: "interactive",
+            lookAhead: 0.05 // ?? is less possible??
+        })
+        Tone.setContext(this.#webAudioContext)
+        this.#toneAudioContext.lookAhead = 0.05
+        this.#mic = new Tone.UserMedia()
     }
     get selectInputDevices() {
         return this.#selectInputDevices
     }
     get selectOutputDevices() {
         return this.#selectOutputDevices
+    }
+    get mic() {
+        return this.#mic
     }
     addOutputDevice(newDevice) {
         this.#outputDevices.push({newDevice})
@@ -57,22 +69,43 @@ export class ConfigureAudioDevices {
     }
 
     changeOutputDevice() {
-        Tone.getContext().dispose() // is this doing what I think it's doing??
-        const audioContext = new AudioContext({
-            latencyHint: "interactive",
-            sinkId: this.#selectOutputDevices.value
-        })
-        Tone.setContext(audioContext)
-        this.changeInputDevice(this.#selectInputDevices.value)
+        this.#webAudioContext.setSinkId(this.#selectOutputDevices.value)
+        this.#toneAudioContext.lookAhead = 0.05 // ?? is less possible??
     }
 
     changeInputDevice() {
-        if (this.#mic != undefined) {
-            this.#mic.close()
-        }
-        this.#mic = new Tone.UserMedia();
-        this.#mic.open(this.#selectInputDevices.value);
-        this.#mic.toDestination()
+        this.#mic.close()
+        this.#mic.open(this.#selectInputDevices.value)
+        // this.#mic.connect(fxChainInput) // should already be connected
+            // we're just changing the device, right??
+    }
+}
+
+export class ConfigureAudioFX {
+
+    #fxChain
+    #DCMeterOut
+    #DCMeterIn
+
+    constructor() {
+        this.#fxChain = []
+        this.#DCMeterIn = new Tone.DCMeter
+        this.#DCMeterOut = new Tone.DCMeter
+        this.#DCMeterIn.connect(this.#DCMeterOut)
+        this.#DCMeterOut.toDestination()
+    }
+    connectToFXChain(mic) {
+        mic.connect(this.#DCMeterIn)
+    }
+
+    // FXs
+    addEffectToChain() {
+        // is it possible to list out all of them and their parameters so that 
+        // I can fuck with them in a fucky interface just to get a feel (or to 
+        // leave it that janky and then polish up the jank a little??!!??!!)
+    }
+    removeEffectFromChain() {
+
     }
 }
 

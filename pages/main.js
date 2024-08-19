@@ -1,30 +1,35 @@
 import * as Tone from 'tone'
-import * as classes from './classes';
-const ConfigureAudioDevices = new classes.ConfigureAudioDevices
-const ConfigureMIDIDevices = new classes.ConfigureMIDIDevices
+import { ConfigureAudioDevices, ConfigureMIDIDevices, ConfigureAudioFX } from './classes';
+const AudioDeviceConfigurer = new ConfigureAudioDevices
+const MIDIDeviceConfigurer = new ConfigureMIDIDevices
+const AudioFXConfigurer = new ConfigureAudioFX
 
 // start button and <dialog> window
 const startDialog = document.querySelector('dialog#start-dialog')
 const startButton = document.querySelector('input#start-button')
 startDialog.showModal()
 startButton.addEventListener('click', async (event) => {
-    await ConfigureAudioDevices.organiseDevices()
-    await ConfigureMIDIDevices.organiseDevices()
+    await AudioDeviceConfigurer.organiseDevices()
+    await MIDIDeviceConfigurer.organiseDevices()
     startDialog.close()
 })
 
 // user inputs
-ConfigureAudioDevices.selectInputDevices.addEventListener('input', (event) => {
-    ConfigureAudioDevices.changeInputDevice()
+AudioDeviceConfigurer.selectInputDevices.addEventListener('input', (event) => {
+    AudioDeviceConfigurer.changeInputDevice()
 })
-ConfigureAudioDevices.selectOutputDevices.addEventListener('input', (event) => {
-    ConfigureAudioDevices.changeOutputDevice()
+AudioDeviceConfigurer.selectOutputDevices.addEventListener('input', (event) => {
+    AudioDeviceConfigurer.changeOutputDevice()
 })
 
 // --- NEXT HERE
 
-
 // classes.js line 119 
+
+const testButton = document.querySelector('input#test')
+testButton.addEventListener('click', (event) => {
+    AudioFXConfigurer.connectToFXChain(AudioDeviceConfigurer.mic)
+})
 
 /*
 const pitchShift = new Tone.PitchShift(12)
@@ -38,10 +43,6 @@ const LPFilter = new Tone.Filter({
     Q: 0.71
 })
 
-const testButton = document.querySelector('input#test')
-testButton.addEventListener('click', (event) => {
-
-})
 
 const LPFreq = document.querySelector('input#lp-freq')
 LPFreq.addEventListener('input', (event) => {

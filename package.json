@@ -8,6 +8,7 @@
     "build": "vite build",
     "preview": "vite preview --port 5003"
   },
+  "author": "MattyGEEgee",
   "devDependencies": {
     "vite": "^5.4.0"
   },
