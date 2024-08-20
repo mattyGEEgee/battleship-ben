@@ -86,6 +86,7 @@ export class ConfigureAudioFX {
     #fxChain
     #DCMeterOut
     #DCMeterIn
+    #fxBypassToggleCheckbox
 
     constructor() {
         this.#fxChain = []
@@ -93,18 +94,67 @@ export class ConfigureAudioFX {
         this.#DCMeterOut = new Tone.DCMeter
         this.#DCMeterIn.connect(this.#DCMeterOut)
         this.#DCMeterOut.toDestination()
+        this.#fxBypassToggleCheckbox = document.querySelector('input#fx-bypass-toggle')
     }
+
+    get fxBypassToggleCheckbox() {
+        return this.#fxBypassToggleCheckbox
+    }
+
     connectToFXChain(mic) {
         mic.connect(this.#DCMeterIn)
     }
 
+    // --- NEXT
+    populateFXSelect() {
+        for (let i in Tone) {
+            console.log(i);
+        }
+    }
+    populateFXParameters(effect) {
+        const listOfParameters = effect.get() // empty .get() gives you all parameters
+        for (let parameter in listOfParameters) {
+            const label = document.createElement('label')
+            label.textContent = parameter
+            const input = document.createElement('input')
+            input.type = 'number'
+            input.id = parameter
+            label.appendChild(input)
+            document.body.appendChild(label)
+        }
+    }
+    // --- </NEXT
+
+    BypassFX() {
+        this.#DCMeterIn.connect(this.#DCMeterOut)
+    }
+
     // FXs
-    addEffectToChain() {
+    addToChain(newEffect) {
         // is it possible to list out all of them and their parameters so that 
         // I can fuck with them in a fucky interface just to get a feel (or to 
         // leave it that janky and then polish up the jank a little??!!??!!)
+
+        // disconnect last from DCMeterOut
+        if (this.#fxChain.length > 0) {
+            console.log('fxChain is greater than 0');
+            this.#fxChain[this.#fxChain.length - 1].disconnect()
+        }
+        // add effect to chain
+        this.#fxChain.push(newEffect)
+        // connect penultimate to last
+        if (this.#fxChain.length > 0) {
+            console.log('fxChain is greater than 0');
+            this.#fxChain[this.#fxChain.length - 2].connect(this.#fxChain[this.#fxChain.length - 1])
+        }
+        // connect last to DCMeterOut
+        this.#fxChain[this.#fxChain.length - 1].connect(this.#DCMeterOut)
+
+            // tone.thing.chain(fxchain[0], fxchain[1], fxchain[2], this.#DCMeterOut) // can it take an array??
+        
+
     }
-    removeEffectFromChain() {
+    removeFromChain() {
 
     }
 }
@@ -160,4 +210,11 @@ export class ConfigureMIDIDevices {
     }
 
     // --- </NEXT
+}
+
+export class NewEffect {
+    constructor() {
+
+    }
+    // FrequencyShifter
 }

@@ -26,7 +26,14 @@
             <ul id="connected-midi-devices"></ul>
         </label>
         <input type="button" value="Test" id="test">
-        <input type="range" id="lp-freq">
+        <label>
+            FX On/Off
+            <input type="checkbox" id="fx-bypass-toggle">
+        </label>
+        <select id="fx-1">
+            <option value="reverb">Reverb</option>
+            <option value="frequency-shifter">Frequency Shifter</option>
+        </select>
 
         <script src="classes.js" type="module"></script>
         <script src="main.js" type="module"></script>
