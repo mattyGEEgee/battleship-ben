@@ -13,6 +13,7 @@ startButton.addEventListener('click', async (event) => {
     await AudioDeviceConfigurer.organiseDevices()
     await MIDIDeviceConfigurer.organiseDevices()
     startDialog.close()
+    startDialog.style.display = "none" 
 })
 
 // user selected input
@@ -23,24 +24,25 @@ AudioDeviceConfigurer.selectInputDevices.addEventListener('input', (event) => {
 AudioDeviceConfigurer.selectOutputDevices.addEventListener('input', (event) => {
     AudioDeviceConfigurer.changeOutputDevice()
 })
+// connect/bypass FX
+AudioFXConfigurer.fxBypassToggleCheckbox.addEventListener('click', (event) => {
+    AudioFXConfigurer.ToggleFX(event.target.checked)
+})
 
 // --- NEXT HERE
 
 // classes.js line 119 
-
-// connect/bypass FX
-AudioFXConfigurer.fxBypassToggleCheckbox.addEventListener('click', (event) => {
-    if (event.target.checked) {
-        // ON
-        console.log('checked')
-        // disconnect and reconnect the 2 DCMeters
-    } else {
-        // OFF
-        console.log('unchecked');
-        // disconnect and reconnect the 2 DCMeters
-    }
+/*
+const defaultEffectSelector = document.querySelector('.fx-selector')
+defaultEffectSelector.addEventListener('input', (event) => {
+    const newEffectName = `Tone.${event.target.value}`
+    const fxNumber = event.target.id.substring(3, 4)
+    AudioFXConfigurer.displayNewParameters(fxNumber , eval(`new ${newEffectName}`))
 })
+*/
 
+
+/*
 const testButton = document.querySelector('input#test')
 testButton.addEventListener('click', (event) => {
 
@@ -58,5 +60,6 @@ selectTest.addEventListener('input', (event) => {
     }
     AudioFXConfigurer.populateFXParameters(effect)
 })
+*/
 
 // --- </NEXT

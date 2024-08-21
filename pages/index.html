@@ -13,27 +13,49 @@
             <p>Press button to start</p>
             <input type="button" value="START" id="start-button">
         </dialog>
-        <label>
-            Input Device
-            <select name="input-devices" id="input-devices"></select>
-        </label>
-        <label>
-            Output Device
-            <select name="output-devices" id="output-devices"></select>
-        </label>
-        <label>
-            Connected MIDI Devices
-            <ul id="connected-midi-devices"></ul>
-        </label>
-        <input type="button" value="Test" id="test">
-        <label>
-            FX On/Off
-            <input type="checkbox" id="fx-bypass-toggle">
-        </label>
-        <select id="fx-1">
-            <option value="reverb">Reverb</option>
-            <option value="frequency-shifter">Frequency Shifter</option>
-        </select>
+        
+        <div id="input-output">
+            <label>
+                Input Device
+                <select name="input-devices" id="input-devices">
+                    <!-- <option value="" disabled selected>Select Input Device</option> -->
+                </select>
+            </label>
+            <label>
+                Output Device
+                <select name="output-devices" id="output-devices">
+                    <!-- <option value="" disabled selected>Select Output Device</option> -->
+                </select>
+            </label>
+            <label>
+                Connected MIDI Devices
+                <ul id="connected-midi-devices"></ul>
+            </label>
+        </div>
+
+        <div id="test-stuff">
+            <input type="button" value="Test" id="test">
+            <label>
+                Bypass FX
+                <input type="checkbox" id="fx-bypass-toggle">
+            </label>
+            <input type="button" value="Add" id="add-new-effect">
+        </div>
+
+        <div id="fx-chain">
+            <!-- Default 
+            <div id="fx-0" class="fx">
+                <select id="fx-0-selector" class="fx-selector"></select>
+                <div id="fx-0-parameters" class="fx-parameters">
+                    <label>
+                        Name
+                        <input type="number" id="fx-0-parameter">
+                    </label>
+                    ...
+                </div>
+            -->
+            </div>
+        </div>
 
         <script src="classes.js" type="module"></script>
         <script src="main.js" type="module"></script>

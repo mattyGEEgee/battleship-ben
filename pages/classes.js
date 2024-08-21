@@ -18,10 +18,10 @@ export class ConfigureAudioDevices {
         this.#toneAudioContext = Tone.getContext()
         this.#webAudioContext = new AudioContext({
             latencyHint: "interactive",
-            lookAhead: 0.05 // ?? is less possible??
+            lookAhead: 0.0005 // ?? is less possible??
         })
         Tone.setContext(this.#webAudioContext)
-        this.#toneAudioContext.lookAhead = 0.05
+        this.#toneAudioContext.lookAhead = 0.0005
         this.#mic = new Tone.UserMedia()
     }
     get selectInputDevices() {
@@ -70,14 +70,12 @@ export class ConfigureAudioDevices {
 
     changeOutputDevice() {
         this.#webAudioContext.setSinkId(this.#selectOutputDevices.value)
-        this.#toneAudioContext.lookAhead = 0.05 // ?? is less possible??
+        this.#toneAudioContext.lookAhead = 0.0005 // ?? is less possible??
     }
 
     changeInputDevice() {
         this.#mic.close()
         this.#mic.open(this.#selectInputDevices.value)
-        // this.#mic.connect(fxChainInput) // should already be connected
-            // we're just changing the device, right??
     }
 }
 
@@ -87,6 +85,7 @@ export class ConfigureAudioFX {
     #DCMeterOut
     #DCMeterIn
     #fxBypassToggleCheckbox
+    #addNewFXButton
 
     constructor() {
         this.#fxChain = []
@@ -95,6 +94,12 @@ export class ConfigureAudioFX {
         this.#DCMeterIn.connect(this.#DCMeterOut)
         this.#DCMeterOut.toDestination()
         this.#fxBypassToggleCheckbox = document.querySelector('input#fx-bypass-toggle')
+        this.#addNewFXButton = document.querySelector('input#add-new-effect')
+        // set up the default/first fx
+        this.#displayNewEffect()
+        this.#addNewFXButton.addEventListener('click', (event) => {
+            this.#displayNewEffect()
+        })
     }
 
     get fxBypassToggleCheckbox() {
@@ -106,56 +111,135 @@ export class ConfigureAudioFX {
     }
 
     // --- NEXT
-    populateFXSelect() {
-        for (let i in Tone) {
-            console.log(i);
+    #displayNewEffect() {
+        let fxNumber = document.querySelectorAll('.fx').length
+
+        // fx div
+        const newFXDiv = document.createElement('div')
+        newFXDiv.id = `fx-${fxNumber}`
+        newFXDiv.classList.add('fx')
+
+        // select
+        const fxSelector = document.createElement('select')
+        fxSelector.id = `fx-${fxNumber}-selector`
+        fxSelector.classList.add('fx-selector')
+        // CHECK THAT THIS WORKS IDENTICALLY TO THE DEFAULT EFFECT-0
+        fxSelector.addEventListener('input', (event) => {
+            const newEffect = eval(`new Tone.${event.target.value}`)
+            const fxNumber = event.target.id.substring(3, 4)
+            this.displayNewParameters(fxNumber , newEffect)
+            this.addToChain(fxNumber, newEffect)
+        })
+        for (let effect in Tone) {
+            const option = document.createElement('option')
+            option.value = effect
+            option.textContent = effect
+            fxSelector.appendChild(option)
+        }
+        newFXDiv.appendChild(fxSelector)
+
+        // remove button
+        const removeButton = document.createElement('input')
+        removeButton.id = `remove-fx-${fxNumber}`
+        removeButton.type = 'button'
+        removeButton.value = 'remove'
+        removeButton.addEventListener('click', (event) => {
+            this.#removeFromChain(fxNumber)
+            this.#removeEffect(fxNumber)
+        })
+        newFXDiv.appendChild(removeButton)
+
+        // append to chain display
+        document.querySelector('#fx-chain').appendChild(newFXDiv)
+    }
+    displayNewParameters(fxNumber, newEffect) {
+        // fx parameters div
+        const fxParameters = document.createElement('div')
+        fxParameters.id = `fx-${fxNumber}-parameters`
+        fxParameters.classList.add('fx-parameters')
+        document.querySelector(`#fx-${fxNumber}`).appendChild(fxParameters)
+
+        // parameters
+        const parametersList = newEffect.get()
+        for (let parameter in parametersList) {
+            // label with parameter name
+            const parameterLabel = document.createElement('label')
+            parameterLabel.textContent = parameter
+
+            // input
+            const parameterInput = document.createElement('input')
+            parameterInput.type = 'number'
+            parameterInput.id = `fx-${fxNumber}-${parameter}`
+            
+            // append all
+            parameterLabel.appendChild(parameterInput)
+            fxParameters.appendChild(parameterLabel)
         }
     }
-    populateFXParameters(effect) {
-        const listOfParameters = effect.get() // empty .get() gives you all parameters
-        for (let parameter in listOfParameters) {
-            const label = document.createElement('label')
-            label.textContent = parameter
-            const input = document.createElement('input')
-            input.type = 'number'
-            input.id = parameter
-            label.appendChild(input)
-            document.body.appendChild(label)
-        }
-    }
+
     // --- </NEXT
 
-    BypassFX() {
-        this.#DCMeterIn.connect(this.#DCMeterOut)
+    ToggleFX(bool) {
+        if (bool) {
+            for (let i = 0; i < this.#fxChain.length; i++) {
+                this.#fxChain[i].disconnect()
+            }
+            this.#DCMeterIn.connect(this.#DCMeterOut)
+        } else {
+            this.#ChainFXChainArray()
+        }
+    }
+    #ChainFXChainArray() {
+        let evalChain = ''
+        for (let i = 0; i < this.#fxChain.length; i++) {
+            this.#fxChain[i].disconnect()
+            if (i == this.#fxChain.length - 1) {
+                evalChain += `this.#fxChain[${i}]`
+            } else {
+                evalChain += `this.#fxChain[${i}],`
+            }
+        }
+        eval(`this.#DCMeterIn.chain(${evalChain})`)
+        // connect last to DCMeterOut
+        this.#fxChain[this.#fxChain.length - 1].connect(this.#DCMeterOut)
     }
 
     // FXs
-    addToChain(newEffect) {
-        // is it possible to list out all of them and their parameters so that 
-        // I can fuck with them in a fucky interface just to get a feel (or to 
-        // leave it that janky and then polish up the jank a little??!!??!!)
-
-        // disconnect last from DCMeterOut
-        if (this.#fxChain.length > 0) {
-            console.log('fxChain is greater than 0');
-            this.#fxChain[this.#fxChain.length - 1].disconnect()
+    addToChain(fxNumber, newEffect) {
+        this.#fxChain.splice(fxNumber, 0, newEffect)
+        // disconnect everything
+        // reconnect/chain the whole array together
+        this.#ChainFXChainArray()
+        /* this is now in its own method (the one above)
+        let evalChain = ''
+        for (let i = 0; i < this.#fxChain.length; i++) {
+            this.#fxChain[i].disconnect()
+            if (i == this.#fxChain.length - 1) {
+                evalChain += `this.#fxChain[${i}]`
+            } else {
+                evalChain += `this.#fxChain[${i}],`
+            }
         }
-        // add effect to chain
-        this.#fxChain.push(newEffect)
-        // connect penultimate to last
-        if (this.#fxChain.length > 0) {
-            console.log('fxChain is greater than 0');
-            this.#fxChain[this.#fxChain.length - 2].connect(this.#fxChain[this.#fxChain.length - 1])
-        }
+        eval(`this.#DCMeterIn.chain(${evalChain})`)
         // connect last to DCMeterOut
         this.#fxChain[this.#fxChain.length - 1].connect(this.#DCMeterOut)
-
-            // tone.thing.chain(fxchain[0], fxchain[1], fxchain[2], this.#DCMeterOut) // can it take an array??
-        
-
+        */
     }
-    removeFromChain() {
-
+    #removeFromChain(fxNumber) {
+        this.#fxChain[fxNumber].disconnect()
+        this.#fxChain[fxNumber - 1].disconnect()
+        this.#fxChain.splice(fxNumber, 1)
+        // if last node, the last node must still stay connected to DCMeterOut
+        if (this.#fxChain[fxNumber]) {
+            this.#fxChain[fxNumber - 1].connect(this.#fxChain[fxNumber])
+        } else {
+            this.#fxChain[fxNumber - 1].connect(this.#DCMeterOut)
+        }
+    }
+    #removeEffect(fxNumber) {
+        const effectDisplay = document.querySelector(`#fx-${fxNumber}`)
+        const fxChain = document.querySelector('#fx-chain')
+        fxChain.removeChild(effectDisplay)
     }
 }
 

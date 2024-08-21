@@ -1,3 +1,48 @@
+dialog#start-dialog {
+    padding: 2.5ch 10ch;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
 select {
     overflow: hidden;
+    padding: 0.5rem;
+    margin-top: 0.5rem;
+}
+label {
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+}
+div#input-output {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    max-width: 85ch;
+}
+div#fx-chain {
+    display: grid;
+    grid-auto-flow: column;
+    grid-template-rows: 15rem;
+    grid-template-columns: repeat(auto-fill, 18ch);
+    column-gap: 2rem;
+    overflow: scroll hidden;
+}
+.fx {
+    margin: 0 1rem;
+    width: 18ch;
+}
+.fx input {
+    width: 100%;
+    margin: 0.5rem 0;
+}
+.fx-selector {
+    width: 100%;
+    margin-bottom: 1rem;
+}
+.fx-parameters {
+    height: 82%;
+    overflow: visible scroll;
+    padding: 0 1rem;
 }
